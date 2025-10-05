@@ -1,0 +1,228 @@
+/* Falling claps overlay */
+.clap-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+.clap-emoji {
+  position: absolute;
+  font-size: 2.2rem;
+  animation: clap-fall 1.8s linear forwards;
+  user-select: none;
+}
+@keyframes clap-fall {
+  0% {
+    opacity: 0.7;
+    transform: translateY(-60px) scale(1.1) rotate(-10deg);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(80vh) scale(1.1) rotate(10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) scale(0.8) rotate(0deg);
+  }
+}
+
+/* Randomize horizontal positions for each clap emoji */
+.clap-emoji-0 { left: 5vw; }
+.clap-emoji-1 { left: 12vw; }
+.clap-emoji-2 { left: 18vw; }
+.clap-emoji-3 { left: 25vw; }
+.clap-emoji-4 { left: 32vw; }
+.clap-emoji-5 { left: 38vw; }
+.clap-emoji-6 { left: 44vw; }
+.clap-emoji-7 { left: 50vw; }
+.clap-emoji-8 { left: 56vw; }
+.clap-emoji-9 { left: 62vw; }
+.clap-emoji-10 { left: 68vw; }
+.clap-emoji-11 { left: 74vw; }
+.clap-emoji-12 { left: 80vw; }
+.clap-emoji-13 { left: 86vw; }
+.clap-emoji-14 { left: 92vw; }
+.clap-emoji-15 { left: 20vw; }
+.clap-emoji-16 { left: 60vw; }
+.clap-emoji-17 { left: 88vw; }
+.flashcard-outer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background: linear-gradient(135deg, #f7fafd, #e3f0ff);
+}
+
+.flashcard-box {
+  width: 400px;
+  height: 300px;
+  perspective: 1000px;
+  transition: transform 0.6s;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #e3f0ff 0%, #fce4ec 100%);
+  position: relative;
+  box-shadow:
+    0 2px 8px rgba(38,198,218,0.18),
+    0 8px 32px rgba(38,198,218,0.12),
+    0 0px 0px 2px #fff,
+    0 0px 0px 4px #e0e0e0;
+}
+
+.flashcard-box::before,
+.flashcard-box::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 10px;
+  bottom: 10px;
+  border-radius: 16px;
+  z-index: -1;
+}
+.flashcard-box::before {
+  background: linear-gradient(135deg, #ffe0b2 0%, #fff9c4 100%);
+  box-shadow: 0 2px 8px rgba(255,193,7,0.10);
+  transform: rotate(-2deg);
+}
+.flashcard-box::after {
+  background: linear-gradient(135deg, #c8e6c9 0%, #b3e5fc 100%);
+  box-shadow: 0 2px 8px rgba(76,175,80,0.10);
+  transform: rotate(2deg);
+}
+
+/* Default: clockwise (right) */
+.flashcard-box.flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border: 2px solid #90caf9;
+  box-shadow: 0 4px 24px 0 rgba(38,198,218,0.18), 0 12px 48px 0 rgba(38,198,218,0.12);
+}
+
+.flashcard-front {
+  background: linear-gradient(135deg, #e3f0ff 0%, #fce4ec 100%);
+  z-index: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 18px;
+}
+
+.flashcard-front::before,
+.flashcard-front::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 10px;
+  bottom: 10px;
+  border-radius: 16px;
+  z-index: -1;
+}
+.flashcard-front::before {
+  background: linear-gradient(135deg, #ffe0b2 0%, #fff9c4 100%);
+  box-shadow: 0 2px 8px rgba(255,193,7,0.10);
+  transform: rotate(-2deg);
+}
+.flashcard-front::after {
+  background: linear-gradient(135deg, #c8e6c9 0%, #b3e5fc 100%);
+  box-shadow: 0 2px 8px rgba(76,175,80,0.10);
+  transform: rotate(2deg);
+}
+
+.flashcard-back {
+  background: linear-gradient(135deg, #26c6da 0%, #e0f7fa 100%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 18px;
+}
+
+.question {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #00796b;
+  margin-bottom: 18px;
+}
+
+.answer-input {
+  padding: 12px;
+  width: 80%;
+  border-radius: 8px;
+  border: 2px solid #80cbc4;
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  background: #fff;
+  text-align: center;
+}
+
+.submit-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #26c6da 0%, #80deea 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(38,198,218,0.12);
+  transition: background 0.2s;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, #00796b 0%, #26c6da 100%);
+}
+
+.result.correct {
+  color: #388e3c;
+  font-size: 1.3rem;
+  margin-top: 12px;
+}
+
+.result.incorrect {
+  color: #d32f2f;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.answer {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #00796b;
+  margin-bottom: 8px;
+}
+
+.explanation {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 12px;
+  text-align: center;
+}

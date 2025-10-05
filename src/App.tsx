@@ -11,6 +11,7 @@ import { TestsPage } from './components/pages/TestsPage';
 import { NotesPage } from './components/pages/NotesPage';
 import { ProgressPage } from './components/pages/ProgressPage';
 import { SettingsPage } from './components/pages/SettingsPage';
+import { FlashcardPage } from './components/pages/FlashcardPage';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -45,6 +46,8 @@ function AppContent() {
         return <ProgressPage />;
       case 'settings':
         return <SettingsPage />;
+      case 'flashcard':
+        return <FlashcardPage />;
       default:
         return <DashboardPage onNavigate={setCurrentPage} />;
     }

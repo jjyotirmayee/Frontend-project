@@ -1,35 +1,38 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { 
   Play, 
-  Plus, 
+  Clipboard, 
   Calendar, 
   FileText, 
   Target, 
   BookOpen 
 } from "lucide-react";
+import Flashcard from "./Flashcard";
 
 interface QuickActionsProps {
   onNavigate: (page: string) => void;
 }
 
 export function QuickActions({ onNavigate }: QuickActionsProps) {
+  const [showFlashcard, setShowFlashcard] = useState(false);
   const quickActions = [
     {
       icon: Play,
       title: "Start Practice Test",
       description: "Take a quick practice test",
-      color: "bg-green-100 text-green-700 hover:bg-green-200",
-      iconColor: "text-green-600",
+      color: "bg-yellow-100 text-yellow-700 hover:bg-yellow-200",
+      iconColor: "text-yellow-600",
       action: () => onNavigate('tests')
     },
     {
-      icon: Plus,
-      title: "Add Subject",
-      description: "Add a new subject to study",
-      color: "bg-blue-100 text-blue-700 hover:bg-blue-200",
-      iconColor: "text-blue-600",
-      action: () => onNavigate('settings')
+      icon: Clipboard,
+      title: "Flashcard",
+      description: "Study smart one flash at a time🔥",
+      color: "bg-green-100 text-green-700 hover:bg-green-200",
+      iconColor: "text-green-600",
+      action: () => onNavigate('flashcard')
     },
     {
       icon: Calendar,
