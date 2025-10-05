@@ -186,3 +186,11 @@
 .flashcard-box.flipped .flashcard-back .next-btn {
   transform: rotateY(-180deg);
 }
+.buttons {
+  display: flex;
+  justify-content: space-between; /* Push buttons to ends */
+  gap: 10px;
+  margin-top: 10px;
+  width: 75%; /* Ensure full width for spacing */
+
+}

@@ -88,9 +88,15 @@ export default function Flashcard() {
               onChange={(e) => setUserAnswer(e.target.value)}
               placeholder="Type your answer here..."
             />
+            <div className="buttons">
+
             <button className="submit-btn" onClick={handleSubmit} disabled={!userAnswer.trim()}>
               Submit
             </button>
+            <button className="submit-btn" onClick={handleNext}>
+              Next
+            </button>
+            </div>
             {isCorrect && <div className="result correct">👏 Correct!</div>}
           </div>
           </div>
