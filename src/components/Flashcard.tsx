@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 import "./Flashcard.css"; // We'll add styles next
+import Confetti from 'react-confetti'
 
 const flashcardsData = [
   {
@@ -37,8 +38,6 @@ export default function Flashcard() {
     "#FBE9E7"  // light orange
   ];
   const currentColor = cardColors[current % cardColors.length];
-  // Alternate flip direction: even = clockwise, odd = anticlockwise
-  const flipDirection = current % 2 === 0 ? 'clockwise' : 'anticlockwise';
 
   const handleSubmit = () => {
     const correct = userAnswer.trim().toLowerCase() === flashcardsData[current].answer.toLowerCase();
@@ -62,39 +61,24 @@ export default function Flashcard() {
   useEffect(() => {
     let timeout: any;
     if (showClaps) {
-      timeout = setTimeout(() => setShowClaps(false), 2000);
+      timeout = setTimeout(() => setShowClaps(false), 5000);
     }
     return () => clearTimeout(timeout);
   }, [showClaps]);
 
   return (
-    <div className="flashcard-outer">
-      {showClaps && (
-        <div className="clap-overlay">
-          {[...Array(40)].map((_, i) => {
-            // Random horizontal position and animation delay
-            const left = Math.random() * 100;
-            const delay = Math.random() * 1.2;
-            const duration = 1.2 + Math.random() * 0.8;
-            return (
-              <span
-                key={i}
-                className="clap-emoji"
-                style={{
-                  left: `${left}vw`,
-                  animationDelay: `${delay}s`,
-                  animationDuration: `${duration}s`,
-                }}
-              >👏</span>
-            );
-          })}
-        </div>
-      )}
+  <div className="flashcard-outer">
+    {showClaps && <Confetti/>}
+    <div className="flashcard-fan">
+      <div className="fan-card fan-card-1"></div>
+      <div className="fan-card fan-card-2"></div>
+      <div className="fan-card fan-card-3"></div>
+      <div className="fan-card fan-card-4"></div>
       <div
-        className={`flashcard-box ${flipped ? `flipped flipped-${flipDirection}` : ""}`}
         style={{ background: currentColor }}
       >
         {!flipped ? (
+          <div className="flashcard-box">
           <div className="flashcard-front">
             <div className="question">{flashcardsData[current].question}</div>
             <input
@@ -104,22 +88,26 @@ export default function Flashcard() {
               onChange={(e) => setUserAnswer(e.target.value)}
               placeholder="Type your answer here..."
             />
-            <button className="submit-btn" onClick={handleSubmit}>
+            <button className="submit-btn" onClick={handleSubmit} disabled={!userAnswer.trim()}>
               Submit
             </button>
             {isCorrect && <div className="result correct">👏 Correct!</div>}
           </div>
+          </div>
         ) : (
+          <div className="flashcard-box flipped" >
           <div className="flashcard-back">
-            <div className="result incorrect">😊 Oops! Here’s the correct answer:</div>
+            <div className="result incorrect">{"😊 Oops! Here’s the correct answer:"}</div>
             <div className="answer">{flashcardsData[current].answer}</div>
             <div className="explanation">{flashcardsData[current].explanation}</div>
             <button className="next-btn" onClick={handleNext}>
               Next
             </button>
           </div>
+          </div>
         )}
       </div>
     </div>
-  );
+  </div>
+);
 }
