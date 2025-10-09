@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -87,6 +87,59 @@ export function SettingsPage() {
     '#a78bfa', '#fb7185', '#38d9a9', '#ffcc02', '#ff8c42'
   ];
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (preferences.theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    } else if (preferences.theme === 'light') {
+      root.classList.add('light');
+      root.classList.remove('dark');
+    } else {
+      root.classList.remove('light', 'dark');
+    }
+  }, [preferences.theme]);
+
+  // Fixed implicit 'any' type errors for parameters
+
+  // Updated helper functions
+  const handleCheckedChange = (checked: boolean, key: keyof typeof notifications) => {
+    setNotifications(prev => ({ ...prev, [key]: checked }));
+  };
+
+  const handleValueChange = (value: string, key: keyof typeof preferences) => {
+    setPreferences(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Updated usage
+  const handleEmailNotificationChange = (checked: boolean) => {
+    setNotifications(prev => ({ ...prev, emailNotifications: checked }));
+    if (checked) {
+      toast.success('Email notifications enabled');
+    } else {
+      toast.info('Email notifications disabled');
+    }
+  };
+
+  // Added functionality for study reminders and exam alerts
+  const handleStudyRemindersChange = (checked: boolean) => {
+    setNotifications(prev => ({ ...prev, studyReminders: checked }));
+    if (checked) {
+      toast.success('Study reminders enabled');
+    } else {
+      toast.info('Study reminders disabled');
+    }
+  };
+
+  const handleExamAlertsChange = (checked: boolean) => {
+    setNotifications(prev => ({ ...prev, examAlerts: checked }));
+    if (checked) {
+      toast.success('Exam alerts enabled');
+    } else {
+      toast.info('Exam alerts disabled');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -160,9 +213,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications.emailNotifications}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, emailNotifications: checked }))
-                  }
+                  onCheckedChange={handleEmailNotificationChange}
                 />
               </div>
               
@@ -175,9 +226,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications.pushNotifications}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, pushNotifications: checked }))
-                  }
+                  onCheckedChange={(checked: boolean) => handleCheckedChange(checked, 'pushNotifications')}
                 />
               </div>
               
@@ -190,9 +239,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications.studyReminders}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, studyReminders: checked }))
-                  }
+                  onCheckedChange={handleStudyRemindersChange}
                 />
               </div>
               
@@ -205,9 +252,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications.examAlerts}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, examAlerts: checked }))
-                  }
+                  onCheckedChange={handleExamAlertsChange}
                 />
               </div>
               
@@ -220,9 +265,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications.weeklyReports}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, weeklyReports: checked }))
-                  }
+                  onCheckedChange={(checked) => handleCheckedChange(checked, 'weeklyReports')}
                 />
               </div>
             </CardContent>
@@ -240,7 +283,7 @@ export function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="theme">Theme</Label>
-                  <Select value={preferences.theme} onValueChange={(value) => setPreferences(prev => ({ ...prev, theme: value }))}>
+                  <Select value={preferences.theme} onValueChange={(value: string) => handleValueChange(value, 'theme')}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -254,27 +297,33 @@ export function SettingsPage() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="language">Language</Label>
-                  <Select value={preferences.language} onValueChange={(value) => setPreferences(prev => ({ ...prev, language: value }))}>
+                  <Select
+                    value={preferences.language}
+                    onValueChange={(value) => handleValueChange(value, 'language')}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Spanish</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="de">German</SelectItem>
+                      <SelectItem value="hi">Hindi</SelectItem>
+                      <SelectItem value="or">Odia</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Timezone</Label>
-                  <Select value={preferences.timezone} onValueChange={(value) => setPreferences(prev => ({ ...prev, timezone: value }))}>
+                  <Select
+                    value={preferences.timezone}
+                    onValueChange={(value) => handleValueChange(value, 'timezone')}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="UTC">UTC</SelectItem>
+                      <SelectItem value="Asia/Kolkata">India Standard Time (IST)</SelectItem>
                       <SelectItem value="EST">Eastern Time</SelectItem>
                       <SelectItem value="PST">Pacific Time</SelectItem>
                       <SelectItem value="GMT">Greenwich Mean Time</SelectItem>
@@ -284,7 +333,7 @@ export function SettingsPage() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="studyGoal">Daily Study Goal (hours)</Label>
-                  <Select value={preferences.studyGoal} onValueChange={(value) => setPreferences(prev => ({ ...prev, studyGoal: value }))}>
+                  <Select value={preferences.studyGoal} onValueChange={(value) => handleValueChange(value, 'studyGoal')}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
