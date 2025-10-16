@@ -1,43 +1,62 @@
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 
 interface ResultPageProps {
   result: {
-    subject: string;
+    score: number;
+    correctCount: number;
+    incorrectCount: number;
     totalQuestions: number;
-    correctAnswers: number;
-    incorrectAnswers: number;
-    detailedExplanation: { question: string; correctAnswer: string; yourAnswer: string }[];
+    questions: { question: string; correctAnswer: string }[];
+    answers: string[];
   };
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export const ResultPage: React.FC<ResultPageProps> = ({ result, onBack }) => {
+  if (!result) return null;
+
+  const { score, correctCount, incorrectCount, totalQuestions, questions, answers } = result;
+
   return (
     <div className="max-w-3xl mx-auto mt-10 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{result.subject} - Test Result</CardTitle>
+          <CardTitle>Test Results</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Total Questions: {result.totalQuestions}</p>
-          <p>Correct Answers: {result.correctAnswers}</p>
-          <p>Incorrect Answers: {result.incorrectAnswers}</p>
-          <p className="font-bold mt-2">Detailed Explanation:</p>
-          <ul className="list-disc ml-5 mt-2">
-            {result.detailedExplanation.map((item, idx) => (
-              <li key={idx} className="mb-1">
-                <strong>Q:</strong> {item.question} <br />
-                <strong>Your Answer:</strong> {item.yourAnswer} <br />
-                <strong>Correct Answer:</strong> {item.correctAnswer}
-              </li>
-            ))}
-          </ul>
-          <Button className="mt-4" onClick={onBack}>
-            Back to Tests
-          </Button>
+          <p className="text-lg font-medium">Total Score: {score} / {totalQuestions * 4}</p>
+          <p>Correct Answers: {correctCount}</p>
+          <p>Incorrect Answers: {incorrectCount}</p>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Detailed Explanation</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {questions.map((q, idx) => (
+            <div key={idx} className="p-4 border rounded-lg">
+              <p className="font-medium">Q{idx + 1}: {q.question}</p>
+              <p>Your Answer: {answers[idx] || "Not Answered"}</p>
+              <p>Correct Answer: {q.correctAnswer}</p>
+              <p>
+                {answers[idx]?.trim().toLowerCase() === q.correctAnswer.toLowerCase() 
+                  ? <span className="text-green-600 font-semibold">Correct (+4)</span>
+                  : <span className="text-red-600 font-semibold">Wrong (-4)</span>}
+              </p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {onBack && (
+        <div className="text-center">
+          <Button onClick={onBack}>Back to Tests</Button>
+        </div>
+      )}
     </div>
   );
 };

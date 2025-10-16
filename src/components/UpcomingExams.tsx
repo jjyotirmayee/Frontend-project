@@ -1,49 +1,28 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { Calendar, Clock } from "lucide-react";
+import { useApp } from "../contexts/AppContext";
 
 const upcomingExams = [
-  {
-    id: 1,
-    subject: "Data Structures & Algorithms",
-    date: "2025-09-15",
-    time: "10:00 AM",
-    type: "Midterm",
-    priority: "high"
-  },
-  {
-    id: 2,
-    subject: "Machine Learning",
-    date: "2025-09-22",
-    time: "2:00 PM",
-    type: "Quiz",
-    priority: "medium"
-  },
-  {
-    id: 3,
-    subject: "Database Systems",
-    date: "2025-09-28",
-    time: "9:00 AM",
-    type: "Final",
-    priority: "high"
-  },
-  {
-    id: 4,
-    subject: "Software Engineering",
-    date: "2025-10-05",
-    time: "11:00 AM",
-    type: "Project Presentation",
-    priority: "medium"
-  }
+  { id: 1, subject: "Data Structures & Algorithms", date: "2025-10-16", time: "10:00" },
+  { id: 2, subject: "Computer Networks", date: "2025-10-17", time: "14:00" },
+  { id: 3, subject: "Operating Systems", date: "2025-10-18", time: "09:00" },
+  { id: 4, subject: "Theory of Computation", date: "2025-10-19", time: "11:00" },
+  { id: 5, subject: "Computer Organization & Architecture", date: "2025-10-20", time: "10:00" },
 ];
 
-const priorityColors = {
-  high: "bg-red-100 text-red-700 border-red-200",
-  medium: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  low: "bg-green-100 text-green-700 border-green-200"
-};
+export function UpcomingExams({ onNavigate }: { onNavigate: (page: string) => void }) {
+  const { setSelectedTest, setIsTestStarted } = useApp();
 
-export function UpcomingExams() {
+  const handleStart = (exam: typeof upcomingExams[0]) => {
+    // Start test immediately for demo
+    if (setSelectedTest) setSelectedTest(exam.subject);
+    if (setIsTestStarted) setIsTestStarted(true);
+
+    // Navigate to TestsPage
+    onNavigate("tests");
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -72,11 +51,7 @@ export function UpcomingExams() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className={priorityColors[exam.priority as keyof typeof priorityColors]}>
-                  {exam.type}
-                </Badge>
-              </div>
+              <Button onClick={() => handleStart(exam)}>Start</Button>
             </div>
           ))}
         </div>

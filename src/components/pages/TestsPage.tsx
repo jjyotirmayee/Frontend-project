@@ -362,11 +362,11 @@ export function TestsPage({ onStartTest }: TestsPageProps) {
   const [isTestStarted, setIsTestStarted] = useState(false);
 
   const availableTests: AvailableTest[] = [
-    { id: '1', subject: 'Data Structures & Algorithms', questions: 5, duration: 30, difficulty: 'medium' },
-    { id: '2', subject: 'Theory of Computation', questions: 5, duration: 30, difficulty: 'medium' },
-    { id: '3', subject: 'Computer Networks', questions: 5, duration: 30, difficulty: 'medium' },
-    { id: '4', subject: 'Computer Organization & Architecture', questions: 5, duration: 30, difficulty: 'medium' },
-    { id: '5', subject: 'Operating Systems', questions: 5, duration: 30, difficulty: 'medium' },
+    { id: '1', subject: 'Data Structures & Algorithms', questions: 20, duration: 30, },
+    { id: '2', subject: 'Theory of Computation', questions: 20, duration: 30,  },
+    { id: '3', subject: 'Computer Networks', questions: 20, duration: 30, },
+    { id: '4', subject: 'Computer Organization & Architecture', questions: 20, duration: 30, },
+    { id: '5', subject: 'Operating Systems', questions: 20, duration: 30,  },
   ];
 
   const difficultyColors = {
