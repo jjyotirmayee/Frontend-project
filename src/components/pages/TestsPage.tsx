@@ -341,290 +341,94 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Progress } from '../ui/progress';
-import { 
-  Play, 
-  FileText, 
-  Clock, 
-  CheckCircle, 
-  Target,
-  Brain,
-  Award,
-  TrendingUp
-} from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
+import { Brain, Play, FileText, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { Question } from './QuestionnairePage';
 
-import { fetchTestQuestions } from "../../api/testApi"; // ✅ Add this at top with other imports
-import { QuestionnairePage } from './QuestionnairePage';
-
-interface TestResult {
+interface AvailableTest {
   id: string;
   subject: string;
-  score: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  timeSpent: number;
-  date: string;
+  questions: number;
+  duration: number;
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
-export function TestsPage() {
-  const { subjects } = useApp();
+interface TestsPageProps {
+  onStartTest?: (subject: string, questions: Question[]) => void;
+}
+
+export function TestsPage({ onStartTest }: TestsPageProps) {
   const [selectedTest, setSelectedTest] = useState<string>('');
   const [isTestStarted, setIsTestStarted] = useState(false);
-  const [currentQuestions, setCurrentQuestions] = useState<any[]>([]);
-  const [currentSubject, setCurrentSubject] = useState<string>('');
 
-  // Mock test results data (for demo)
-  const [testResults] = useState<TestResult[]>([
-    {
-      id: '1',
-      subject: 'Data Structures & Algorithms',
-      score: 85,
-      totalQuestions: 20,
-      correctAnswers: 17,
-      timeSpent: 25,
-      date: '2025-09-06',
-      difficulty: 'medium'
-    },
-    {
-      id: '2',
-      subject: 'Theory of Computation',
-      score: 78,
-      totalQuestions: 20,
-      correctAnswers: 15,
-      timeSpent: 28,
-      date: '2025-09-05',
-      difficulty: 'medium'
-    },
-    {
-      id: '3',
-      subject: 'Computer Networks',
-      score: 90,
-      totalQuestions: 20,
-      correctAnswers: 18,
-      timeSpent: 27,
-      date: '2025-09-04',
-      difficulty: 'medium'
-    },
-    {
-      id: '4',
-      subject: 'Computer Organization & Architecture',
-      score: 82,
-      totalQuestions: 20,
-      correctAnswers: 16,
-      timeSpent: 30,
-      date: '2025-09-03',
-      difficulty: 'medium'
-    },
-    {
-      id: '5',
-      subject: 'Operating Systems',
-      score: 88,
-      totalQuestions: 20,
-      correctAnswers: 17,
-      timeSpent: 26,
-      date: '2025-09-02',
-      difficulty: 'medium'
-    }
-  ]);
-
-  // Available tests for 5 subjects
-  const availableTests = [
-    {
-      id: '1',
-      subject: 'Data Structures & Algorithms',
-      questions: 20,
-      duration: 30,
-      difficulty: 'medium' as const
-    },
-    {
-      id: '2',
-      subject: 'Theory of Computation',
-      questions: 20,
-      duration: 30,
-      difficulty: 'medium' as const
-    },
-    {
-      id: '3',
-      subject: 'Computer Networks',
-      questions: 20,
-      duration: 30,
-      difficulty: 'medium' as const
-    },
-    {
-      id: '4',
-      subject: 'Computer Organization & Architecture',
-      questions: 20,
-      duration: 30,
-      difficulty: 'medium' as const
-    },
-    {
-      id: '5',
-      subject: 'Operating Systems',
-      questions: 20,
-      duration: 30,
-      difficulty: 'medium' as const
-    }
+  const availableTests: AvailableTest[] = [
+    { id: '1', subject: 'Data Structures & Algorithms', questions: 5, duration: 30, difficulty: 'medium' },
+    { id: '2', subject: 'Theory of Computation', questions: 5, duration: 30, difficulty: 'medium' },
+    { id: '3', subject: 'Computer Networks', questions: 5, duration: 30, difficulty: 'medium' },
+    { id: '4', subject: 'Computer Organization & Architecture', questions: 5, duration: 30, difficulty: 'medium' },
+    { id: '5', subject: 'Operating Systems', questions: 5, duration: 30, difficulty: 'medium' },
   ];
 
   const difficultyColors = {
     easy: 'bg-green-100 text-green-700',
     medium: 'bg-yellow-100 text-yellow-700',
-    hard: 'bg-red-100 text-red-700'
+    hard: 'bg-red-100 text-red-700',
   };
 
-  // Map UI subject names to collection names
-  const subjectMap: Record<string, string> = {
-    "Data Structures & Algorithms": "datastructuresalgorithm",
-    "Computer Organization & Architecture": "coa",
-    "Database Management Systems": "dbms",
-    "Theory of Computation": "toc",
-    "Computer Networks": "cn",
-  };
-
-  // start test function fetches questions
-  const startTest = async (testId: string) => {
-    const test = availableTests.find(t => t.id === testId);
-    if (!test) return;
-
-    setSelectedTest(testId);
+  const startTest = (test: AvailableTest) => {
+    setSelectedTest(test.id);
     setIsTestStarted(true);
-    setCurrentSubject(test.subject);
 
-    toast.success(`Starting ${test.subject} test. Fetching questions...`);
+    const dummyQuestions: Question[] = Array.from({ length: test.questions }, (_, idx) => ({
+      question: `Sample Question ${idx + 1} for ${test.subject}?`,
+      correctAnswer: `Answer ${idx + 1}`,
+    }));
 
-    try {
-      // Dummy questions for now
-      const questions = Array.from({ length: test.questions }, (_, i) => ({
-        question: `Question ${i + 1} for ${test.subject}?`,
-        correctAnswer: "answer"
-      }));
+    toast.success(`Starting ${test.subject} test...`);
 
-      setCurrentQuestions(questions);
-      toast.success(`Loaded ${questions.length} questions for ${test.subject}`);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to fetch test questions.");
-    } finally {
-      setIsTestStarted(false);
-    }
+    if (onStartTest) onStartTest(test.subject, dummyQuestions);
+
+    setIsTestStarted(false);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Practice Tests</h1>
-          <p className="text-muted-foreground mt-2">
-            Test your knowledge across core CS subjects
-          </p>
-        </div>
-      </div>
-
-      {/* Available Tests */}
-      {!currentQuestions.length && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+      <h1 className="text-3xl font-bold">Available Tests</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {availableTests.map((test) => (
+          <Card key={test.id}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="w-5 h-5 text-primary" />
-                Available Tests
+                {test.subject}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {availableTests.map((test) => (
-                  <div
-                    key={test.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="space-y-2">
-                      <h4 className="font-medium">{test.subject}</h4>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <FileText className="w-3 h-3" />
-                          {test.questions} questions
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {test.duration} min
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={difficultyColors[test.difficulty]}>
-                        {test.difficulty}
-                      </Badge>
-                      <Button 
-                        size="sm" 
-                        onClick={() => startTest(test.id)}
-                        disabled={isTestStarted}
-                      >
-                        Start
-                      </Button>
-                    </div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
+                    {test.questions} questions
                   </div>
-                ))}
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {test.duration} min
+                  </div>
+                </div>
+                <Badge className={difficultyColors[test.difficulty]}>{test.difficulty}</Badge>
               </div>
+              <Button
+                size="sm"
+                onClick={() => startTest(test)}
+                disabled={isTestStarted}
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Start
+              </Button>
             </CardContent>
           </Card>
-
-          {/* Recent Results */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" />
-                Recent Results
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {testResults.map((result) => (
-                  <div key={result.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-medium">{result.subject}</h4>
-                      <Badge className={difficultyColors[result.difficulty]}>
-                        {result.difficulty}
-                      </Badge>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span>Score</span>
-                        <span className="font-medium">{result.score}%</span>
-                      </div>
-                      <Progress value={result.score} className="h-2" />
-                    </div>
-                    <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-600" />
-                          {result.correctAnswers}/{result.totalQuestions}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {result.timeSpent} min
-                        </div>
-                      </div>
-                      <span>{new Date(result.date).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Questionnaire Page */}
-      {currentQuestions.length > 0 && (
-        <QuestionnairePage
-          subject={currentSubject}
-          questions={currentQuestions}
-          onFinish={() => setCurrentQuestions([])}
-        />
-      )}
+        ))}
+      </div>
     </div>
   );
 }

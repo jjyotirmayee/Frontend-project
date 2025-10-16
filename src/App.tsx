@@ -7,15 +7,22 @@ import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { DashboardPage } from './components/pages/DashboardPage';
 import { PlannerPage } from './components/pages/PlannerPage';
-import { TestsPage } from './components/pages/TestsPage';
 import { NotesPage } from './components/pages/NotesPage';
 import { ProgressPage } from './components/pages/ProgressPage';
 import { SettingsPage } from './components/pages/SettingsPage';
 import { FlashcardPage } from './components/pages/FlashcardPage';
+import { TestsPage } from './components/pages/TestsPage';
+import { QuestionnairePage, Question } from './components/pages/QuestionnairePage';
+import { ResultPage } from './components/pages/ResultPage';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard');
+
+  // For test flow
+  const [currentSubject, setCurrentSubject] = useState('');
+  const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
+  const [currentResult, setCurrentResult] = useState<any>(null);
 
   if (isLoading) {
     return (
@@ -32,6 +39,17 @@ function AppContent() {
     return <LoginPage />;
   }
 
+  const handleStartTest = (subject: string, questions: Question[]) => {
+    setCurrentSubject(subject);
+    setCurrentQuestions(questions);
+    setCurrentPage('questionnaire');
+  };
+
+  const handleFinishTest = (result: any) => {
+    setCurrentResult(result);
+    setCurrentPage('result');
+  };
+
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -39,7 +57,7 @@ function AppContent() {
       case 'planner':
         return <PlannerPage />;
       case 'tests':
-        return <TestsPage />;
+        return <TestsPage onStartTest={handleStartTest} />;
       case 'notes':
         return <NotesPage />;
       case 'progress':
@@ -48,6 +66,21 @@ function AppContent() {
         return <SettingsPage />;
       case 'flashcard':
         return <FlashcardPage />;
+      case 'questionnaire':
+        return (
+          <QuestionnairePage
+            subject={currentSubject}
+            questions={currentQuestions}
+            onFinish={handleFinishTest}
+          />
+        );
+      case 'result':
+        return (
+          <ResultPage
+            result={currentResult}
+            onBack={() => setCurrentPage('tests')}
+          />
+        );
       default:
         return <DashboardPage onNavigate={setCurrentPage} />;
     }
@@ -56,13 +89,9 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background">
       <Header currentPage={currentPage} onNavigate={setCurrentPage} />
-      
       <div className="flex">
         <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-        
-        <main className="flex-1 p-6">
-          {renderPage()}
-        </main>
+        <main className="flex-1 p-6">{renderPage()}</main>
       </div>
     </div>
   );
