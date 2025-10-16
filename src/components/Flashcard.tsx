@@ -57,7 +57,7 @@ export default function Flashcard() {
   useEffect(() => {
     let timeout: any;
     if (showClaps) {
-      timeout = setTimeout(() => setShowClaps(false), 3000);
+      timeout = setTimeout(() => setShowClaps(false), 5000);
     }
     return () => clearTimeout(timeout);
   }, [showClaps]);

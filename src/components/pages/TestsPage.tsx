@@ -338,7 +338,7 @@
 
 
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -374,6 +374,20 @@ export function TestsPage() {
   const { subjects } = useApp();
   const [selectedTest, setSelectedTest] = useState<string>('');
   const [isTestStarted, setIsTestStarted] = useState(false);
+
+  useEffect(() => {
+      fetch("http://127.0.0.1:8000/api/exam/") // ✅ Update if your endpoint differs
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Fetched data:", data);
+          setSelectedTest(data);
+          // setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error fetching data:", err);
+          // setLoading(false);
+        });
+    }, []);
 
   // Mock test results data (for demo)
   const [testResults] = useState<TestResult[]>([
