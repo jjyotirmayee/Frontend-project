@@ -1,7 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { StickyNote, Plus, Edit3, Trash2, Calendar, Tag, Brain, Wifi, Cpu, BookOpen, Layers } from 'lucide-react';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Badge } from '../ui/badge';
+import { 
+  StickyNote, 
+  Plus, 
+  Edit3, 
+  Trash2, 
+  Calendar,
+  Tag,
+  Brain,
+  Wifi,
+  Cpu,
+  BookOpen,
+  Layers
+} from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { toast } from 'sonner@2.0.3';
 
@@ -10,6 +28,9 @@ export function NotesPage() {
   const [subjects, setSubjects] = useState<any[]>([]);
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
+
+  const [newNote, setNewNote] = useState({ title: '', content: '', subject: '', tags: '' });
+  const [editNote, setEditNote] = useState({ title: '', content: '', subject: '', tags: '' });
 
   const iconMap: any = {
     brain: <Brain className="w-4 h-4 text-white" />,
@@ -22,6 +43,11 @@ export function NotesPage() {
   useEffect(() => {
     async function fetchSubjects() {
       try {
+        // Uncomment below line when backend is ready
+        // const res = await fetch('/api/subjects'); 
+        // const data = await res.json();
+
+        // Mock subjects for now
         const data = [
           { id: '1', name: 'Data Structure & Algorithms', icon: 'brain' },
           { id: '2', name: 'Computer Networks', icon: 'wifi' },
@@ -29,6 +55,7 @@ export function NotesPage() {
           { id: '4', name: 'Theory of Computation', icon: 'book-open' },
           { id: '5', name: 'Computer Organization & Architecture', icon: 'layers' }
         ];
+
         setSubjects(data);
       } catch (err) {
         console.error(err);
@@ -40,16 +67,39 @@ export function NotesPage() {
 
   const getBackgroundColor = (subjectName: string) => {
     switch (subjectName) {
-      case "Data Structure & Algorithms": return "#60a5fa"; // lighter blue
-      case "Computer Networks": return "#34d399"; // lighter green
-      case "Operating Systems": return "#fcd34d"; // lighter yellow
-      case "Theory of Computation": return "#a78bfa"; // lighter purple
-      case "Computer Organization & Architecture": return "#f87171"; // lighter red
+      case "Data Structure & Algorithms": return "#60a5fa"; 
+      case "Computer Networks": return "#34d399"; 
+      case "Operating Systems": return "#fbbf24"; 
+      case "Theory of Computation": return "#a78bfa"; 
+      case "Computer Organization & Architecture": return "#f87171"; 
       default: return "#60a5fa";
     }
   };
 
   const getNotesBySubject = (subject: string) => notes.filter(note => note.subject === subject);
+
+  const handleAddNote = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNote.title || !newNote.content || !newNote.subject) {
+      toast.error('Please fill in title, content, and subject');
+      return;
+    }
+    const tags = newNote.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    addNote({ ...newNote, tags });
+    setNewNote({ title: '', content: '', subject: '', tags: '' });
+    setIsAddingNote(false);
+    toast.success('Note added successfully!');
+  };
+
+  const handleEditNote = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingNote) return;
+    const tags = editNote.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    updateNote(editNote.id || editingNote, { ...editNote, tags });
+    setEditingNote(null);
+    setEditNote({ title: '', content: '', subject: '', tags: '' });
+    toast.success('Note updated successfully!');
+  };
 
   const handleDeleteNote = (noteId: string) => {
     deleteNote(noteId);
@@ -58,6 +108,7 @@ export function NotesPage() {
 
   const startEditNote = (note: any) => {
     setEditingNote(note.id);
+    setEditNote({ ...note, tags: note.tags.join(', ') });
   };
 
   const formatDate = (dateString: string) =>
@@ -65,14 +116,59 @@ export function NotesPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h1 className="text-3xl font-extrabold text-indigo-600 drop-shadow-lg underline decoration-indigo-400 underline-offset-4">
+          <h1 className="text-2xl font-extrabold text-indigo-600 drop-shadow-md underline decoration-indigo-400 underline-offset-4">
             Study Notes
           </h1>
           <p className="text-gray-600 mt-0.5 italic">📝 Your personal study companion</p>
         </div>
+
+        <Dialog open={isAddingNote} onOpenChange={setIsAddingNote}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="flex items-center gap-1">
+              <Plus className="h-4 w-4" /> Add Note
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-xl rounded-xl shadow-lg">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold text-gray-800 drop-shadow-sm">Create New Note</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddNote} className="space-y-3 mt-3">
+              <div className="space-y-1">
+                <Label htmlFor="title" className="text-sm font-bold">Title</Label>
+                <Input id="title" placeholder="Enter note title" value={newNote.title} onChange={(e) => setNewNote(prev => ({ ...prev, title: e.target.value }))} required size="sm" />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="subject" className="text-sm font-bold">Subject</Label>
+                <Select value={newNote.subject} onValueChange={(value) => setNewNote(prev => ({ ...prev, subject: value }))}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Select subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects.map((s) => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="content" className="text-sm font-bold">Content</Label>
+                <Textarea id="content" placeholder="Write your notes here..." className="min-h-[150px] text-sm" value={newNote.content} onChange={(e) => setNewNote(prev => ({ ...prev, content: e.target.value }))} required />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="tags" className="text-sm font-bold">Tags (comma-separated)</Label>
+                <Input id="tags" placeholder="e.g., algorithms, important" value={newNote.tags} onChange={(e) => setNewNote(prev => ({ ...prev, tags: e.target.value }))} size="sm" />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" size="sm">Cancel</Button>
+                <Button type="submit" size="sm">Create Note</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Subjects Grid */}
@@ -87,7 +183,7 @@ export function NotesPage() {
               {/* Subject Box */}
               <div className="flex items-center gap-2 p-3 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-md" style={{ backgroundColor: bgColor }}>
                 {icon}
-                <h2 className="text-base font-extrabold text-white">{subject.name}</h2>
+                <h2 className="text-xl font-extrabold text-white">{subject.name}</h2> {/* BIGGER font size */}
               </div>
 
               {/* Notes or No Notes */}
@@ -96,7 +192,7 @@ export function NotesPage() {
                   <StickyNote className="w-6 h-6 text-white animate-bounce mb-1" />
                   <h3 className="text-xs font-extrabold text-white mb-1">No notes yet</h3>
                   <p className="text-white text-center text-[11px] mb-2 italic">Start adding your notes!</p>
-                  <Button variant="outline" size="xs" className="flex items-center gap-1">
+                  <Button variant="outline" size="xs" className="flex items-center gap-1" onClick={() => setIsAddingNote(true)}>
                     <Plus className="w-3 h-3" /> Add Note
                   </Button>
                 </div>
@@ -125,7 +221,7 @@ export function NotesPage() {
                           </div>
                         )}
                         <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                          <Calendar className="w-3 h-3" /><span>{formatDate(note.createdAt)}</span>
+                          <Calendar className="w-3 h-3" /><span>{new Date(note.createdAt).toLocaleDateString()}</span>
                         </div>
                       </CardContent>
                     </Card>
