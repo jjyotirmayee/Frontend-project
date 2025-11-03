@@ -14,6 +14,7 @@ import { FlashcardPage } from './components/pages/FlashcardPage';
 import { TestsPage } from './components/pages/TestsPage';
 import { QuestionnairePage, Question } from './components/pages/QuestionnairePage';
 import { ResultPage } from './components/pages/ResultPage';
+import  QuickRevisionPage  from './components/pages/QuickRevisionPage';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -59,7 +60,7 @@ function AppContent() {
       case 'tests':
         return <TestsPage onStartTest={handleStartTest} />;
       case 'notes':
-        return <NotesPage />;
+        return <NotesPage onNavigate={setCurrentPage}/>;
       case 'progress':
         return <ProgressPage />;
       case 'settings':
@@ -81,8 +82,10 @@ function AppContent() {
             onBack={() => setCurrentPage('tests')}
           />
         );
+      case 'quickrevision':  
+        return <QuickRevisionPage />;
       default:
-        return <DashboardPage onNavigate={setCurrentPage} />;
+        return <DashboardPage onNavigate={setCurrentPage} />
     }
   };
 
