@@ -95,10 +95,7 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
   const fetchNotesFromAPI = async (topicId: string) => {
     setIsLoadingNotes(true);
     try {
-      console.log('Fetching notes for topic ID:', topicId);
       const response = await fetch(`http://localhost:8000/api/notes/${topicId}/`);
-      
-      console.log('Response status:', response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -107,7 +104,6 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
       }
       
       const data = await response.json();
-      console.log('API Response:', data);
       
       // Handle the new API response format and split into lines for bullet points
       let notesArray: string[] = [];
@@ -125,9 +121,6 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
           return [];
         });
       }
-      
-      console.log('Total notes loaded:', notesArray.length);
-      console.log('Total characters:', notesArray.join('\n').length);
       
       setFetchedNotes(notesArray);
       setShowNotesDialog(true);
@@ -306,36 +299,38 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
   })}
 </div>
 
-      {/* Enhanced Study Notes Modal */}
+      {/* Enhanced Study Notes Modal - Dark Mode Compatible */}
       {showNotesDialog && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center"
-          style={{ backgroundColor: '#fafafa' }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 dark:bg-black/90 backdrop-blur-md"
         >
           {/* modal container */}
           <div
-            className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-[90vw] max-w-4xl flex flex-col"
+            className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border-2 border-gray-300 dark:border-gray-700 w-[90vw] max-w-4xl flex flex-col"
             style={{ 
               maxHeight: '80vh',
               padding: '2.5rem',
-              margin: '3rem 2rem'
+              margin: '3rem 2rem',
+              backgroundColor: document.documentElement.classList.contains('dark') 
+                ? 'rgb(17, 24, 39)' 
+                : 'rgb(255, 255, 255)',
             }}
           >
             {/* header */}
-            <div className="flex justify-between items-start mb-6 pb-3">
+            <div className="flex justify-between items-start mb-6 pb-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900 inline-block border-b-4 border-violet-500 pb-1 mb-3">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 inline-block border-b-4 border-violet-500 dark:border-violet-400 pb-1 mb-3">
                   {selectedTopic?.name} – Study Notes
                 </h2>
                 {!isLoadingNotes && fetchedNotes.length > 0 && (
-                  <p className="text-sm text-gray-500 mt-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
                     {fetchedNotes.length} notes loaded • {fetchedNotes.join('\n').length} characters
                   </p>
                 )}
               </div>
               <button
                 onClick={() => setShowNotesDialog(false)}
-                className="text-gray-500 hover:text-gray-800 text-3xl font-bold leading-none transform hover:scale-110 transition-transform duration-200 ml-4"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 text-3xl font-bold leading-none transform hover:scale-110 transition-all duration-200 ml-4"
                 aria-label="Close"
                 style={{ lineHeight: '1' }}
               >
@@ -345,7 +340,7 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
 
             {/* notes content - scrollable */}
             <div 
-              className="notes-scrollable text-gray-800 leading-relaxed border-l-2 border-violet-200 pl-4"
+              className="notes-scrollable text-gray-900 dark:text-gray-200 leading-relaxed border-l-2 border-violet-200 dark:border-violet-700 pl-4"
               style={{ 
                 overflowY: 'auto',
                 flex: '1 1 0%',
@@ -355,31 +350,31 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
               {isLoadingNotes ? (
                 <div className="flex items-center justify-center h-full py-12">
                   <div className="text-center">
-                    <div className="inline-block w-10 h-10 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mb-3"></div>
-                    <p className="text-gray-700 text-base">Loading notes...</p>
+                    <div className="inline-block w-10 h-10 border-4 border-violet-200 dark:border-violet-700 border-t-violet-600 dark:border-t-violet-400 rounded-full animate-spin mb-3"></div>
+                    <p className="text-gray-800 dark:text-gray-300 text-base">Loading notes...</p>
                   </div>
                 </div>
               ) : fetchedNotes.length > 0 ? (
                 <ul className="space-y-2 pr-4">
                   {fetchedNotes.map((note, i) => (
                     <li key={i} className="flex gap-3">
-                      <span className="text-violet-600 font-bold flex-shrink-0">•</span>
-                      <span className="flex-1 text-gray-800">{note}</span>
+                      <span className="text-violet-600 dark:text-violet-400 font-bold flex-shrink-0">•</span>
+                      <span className="flex-1 text-gray-900 dark:text-gray-200">{note}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-gray-500 text-center py-8">No notes available yet.</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-center py-8">No notes available yet.</p>
                 </div>
               )}
             </div>
 
             {/* footer */}
-            <div className="flex justify-end pt-6 mt-4 border-t border-gray-200">
+            <div className="flex justify-end pt-6 mt-4 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setShowNotesDialog(false)}
-                className="bg-violet-600 text-white px-8 py-3 rounded-xl hover:bg-violet-700 font-semibold text-base transition-colors shadow-md hover:shadow-lg"
+                className="bg-violet-600 dark:bg-violet-500 text-white px-8 py-3 rounded-xl hover:bg-violet-700 dark:hover:bg-violet-600 font-semibold text-base transition-colors shadow-md hover:shadow-lg"
               >
                 Close
               </button>
@@ -388,7 +383,7 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
         </div>
       )}
 
-      {/* Custom Scrollbar Styles - Enhanced for Notion-like feel */}
+      {/* Custom Scrollbar Styles - Dark Mode Compatible */}
       <style>{`
         .notes-scrollable {
           overflow-y: auto !important;
@@ -396,6 +391,12 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
           scrollbar-width: thin !important;
           scrollbar-color: #9333ea #f3e8ff !important;
         }
+        
+        /* Dark mode scrollbar */
+        .dark .notes-scrollable {
+          scrollbar-color: #a78bfa #374151 !important;
+        }
+        
         .notes-scrollable::-webkit-scrollbar {
           width: 8px !important;
         }
@@ -403,13 +404,31 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
           background: #f3e8ff !important;
           border-radius: 10px !important;
         }
+        
+        /* Dark mode webkit scrollbar track */
+        .dark .notes-scrollable::-webkit-scrollbar-track {
+          background: #374151 !important;
+        }
+        
         .notes-scrollable::-webkit-scrollbar-thumb {
           background: #9333ea !important;
           border-radius: 10px !important;
         }
+        
+        /* Dark mode webkit scrollbar thumb */
+        .dark .notes-scrollable::-webkit-scrollbar-thumb {
+          background: #a78bfa !important;
+        }
+        
         .notes-scrollable::-webkit-scrollbar-thumb:hover {
           background: #7e22ce !important;
         }
+        
+        /* Dark mode webkit scrollbar thumb hover */
+        .dark .notes-scrollable::-webkit-scrollbar-thumb:hover {
+          background: #8b5cf6 !important;
+        }
+        
         .shadow-2xl {
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
         }

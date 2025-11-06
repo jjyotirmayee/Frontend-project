@@ -2,22 +2,20 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  width: 100vw;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10;
+  min-height: calc(100vh - 200px);
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
 .flashcard-box {
-  /* reduced size to be more compact */
   width: 560px;
   height: 320px;
   perspective: 1000px;
   transition: transform 0.6s;
   border-radius: 18px;
   position: relative;
+  margin: 0 auto;
 }
 
 .flashcard-box::before,
@@ -112,6 +110,29 @@
   background: linear-gradient(135deg, #00796b 0%, #26c6da 100%);
 }
 
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.next-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #26c6da 0%, #80deea 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(38,198,218,0.12);
+  transition: 0.2s;
+}
+
+.next-btn:hover {
+  background: linear-gradient(135deg, #00796b 0%, #26c6da 100%);
+}
+
 .result.correct {
   color: #388e3c;
   font-size: 1.3rem;
@@ -137,18 +158,19 @@
   margin-bottom: 12px;
   text-align: center;
 }
+
 .flashcard-fan {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  width: 100vw;
+  min-height: 400px;
+  width: 100%;
+  padding: 2rem;
 }
 
 .fan-card {
   position: absolute;
-  /* match reduced flashcard size */
   width: 560px;
   height: 320px;
   border-radius: 18px;
@@ -191,11 +213,44 @@
 .flashcard-box.flipped .flashcard-back .next-btn {
   transform: rotateY(-180deg);
 }
+
 .buttons {
   display: flex;
-  justify-content: space-between; /* Push buttons to ends */
+  justify-content: space-between;
   gap: 10px;
   margin-top: 10px;
-  width: 75%; /* Ensure full width for spacing */
+  width: 100%;
+  max-width: 400px;
+}
 
+.loading, .empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .flashcard-box,
+  .fan-card {
+    width: 90%;
+    max-width: 560px;
+    height: 280px;
+  }
+  
+  .question {
+    font-size: 1.2rem;
+  }
+  
+  .answer-input {
+    font-size: 1rem;
+    width: 90%;
+  }
+  
+  .flashcard-outer {
+    padding: 1rem;
+  }
 }

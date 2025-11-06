@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { WelcomeSection } from "../WelcomeSection";
 import { UpcomingExams } from "../UpcomingExams";
 import { StudyProgress } from "../StudyProgress";
@@ -5,11 +6,13 @@ import { QuickActions } from "../QuickActions";
 import { RecentActivity } from "../RecentActivity";
 import { Footer } from "../Footer";
 
-interface DashboardPageProps {
-  onNavigate: (page: string) => void;
-}
+export function DashboardPage() {
+  const navigate = useNavigate();
+  
+  const handleNavigate = (page: string) => {
+    navigate(`/${page}`);
+  };
 
-export function DashboardPage({ onNavigate }: DashboardPageProps) {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -20,8 +23,8 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Pass onNavigate to UpcomingExams */}
-          <UpcomingExams onNavigate={onNavigate} />
-          <QuickActions onNavigate={onNavigate} />
+          <UpcomingExams onNavigate={handleNavigate} />
+          <QuickActions onNavigate={handleNavigate} />
         </div>
         
         {/* Right Column */}

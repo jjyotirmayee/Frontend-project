@@ -26,7 +26,7 @@ interface SidebarProps {
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   return (
-    <aside className="w-64 bg-sidebar border-r border-sidebar-border h-full flex flex-col">
+    <aside className="w-64 bg-sidebar border-r border-sidebar-border flex flex-col flex-shrink-0">
       <div className="p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">

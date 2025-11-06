@@ -1,29 +1,13 @@
-import { useState } from 'react';
+import { RouterProvider } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppProvider } from './contexts/AppContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from './components/ui/sonner';
 import { LoginPage } from './components/auth/LoginPage';
-import { Header } from './components/Header';
-import { Sidebar } from './components/Sidebar';
-import { DashboardPage } from './components/pages/DashboardPage';
-import { PlannerPage } from './components/pages/PlannerPage';
-import { NotesPage } from './components/pages/NotesPage';
-import { ProgressPage } from './components/pages/ProgressPage';
-import { SettingsPage } from './components/pages/SettingsPage';
-import { FlashcardPage } from './components/pages/FlashcardPage';
-import { TestsPage } from './components/pages/TestsPage';
-import { QuestionnairePage, Question } from './components/pages/QuestionnairePage';
-import { ResultPage } from './components/pages/ResultPage';
-import  QuickRevisionPage  from './components/pages/QuickRevisionPage';
+import { router } from './router';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
-  const [currentPage, setCurrentPage] = useState('dashboard');
-
-  // For test flow
-  const [currentSubject, setCurrentSubject] = useState('');
-  const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
-  const [currentResult, setCurrentResult] = useState<any>(null);
 
   if (isLoading) {
     return (
@@ -40,73 +24,18 @@ function AppContent() {
     return <LoginPage />;
   }
 
-  const handleStartTest = (subject: string, questions: Question[]) => {
-    setCurrentSubject(subject);
-    setCurrentQuestions(questions);
-    setCurrentPage('questionnaire');
-  };
-
-  const handleFinishTest = (result: any) => {
-    setCurrentResult(result);
-    setCurrentPage('result');
-  };
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        return <DashboardPage onNavigate={setCurrentPage} />;
-      case 'planner':
-        return <PlannerPage />;
-      case 'tests':
-        return <TestsPage onStartTest={handleStartTest} />;
-      case 'notes':
-        return <NotesPage onNavigate={setCurrentPage}/>;
-      case 'progress':
-        return <ProgressPage />;
-      case 'settings':
-        return <SettingsPage />;
-      case 'flashcard':
-        return <FlashcardPage />;
-      case 'questionnaire':
-        return (
-          <QuestionnairePage
-            subject={currentSubject}
-            questions={currentQuestions}
-            onFinish={handleFinishTest}
-          />
-        );
-      case 'result':
-        return (
-          <ResultPage
-            result={currentResult}
-            onBack={() => setCurrentPage('tests')}
-          />
-        );
-      case 'quickrevision':  
-        return <QuickRevisionPage />;
-      default:
-        return <DashboardPage onNavigate={setCurrentPage} />
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Header currentPage={currentPage} onNavigate={setCurrentPage} />
-      <div className="flex">
-        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-        <main className="flex-1 p-6">{renderPage()}</main>
-      </div>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppProvider>
-        <AppContent />
-        <Toaster />
-      </AppProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppProvider>
+          <AppContent />
+          <Toaster />
+        </AppProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

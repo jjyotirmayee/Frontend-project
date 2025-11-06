@@ -16,7 +16,6 @@ export default function Flashcard() {
     fetch("http://127.0.0.1:8000/api/exam/") // ✅ Update if your endpoint differs
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched data:", data);
         setFlashcardsData(data);
         setLoading(false);
       })

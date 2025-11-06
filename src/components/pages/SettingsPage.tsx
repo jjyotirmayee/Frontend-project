@@ -22,11 +22,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
-import { toast } from 'sonner@2.0.3';
+import { useTheme } from '../../contexts/ThemeContext';
+import { toast } from 'sonner';
 
 export function SettingsPage() {
   const { user, logout } = useAuth();
   const { subjects, addSubject, updateSubject, deleteSubject } = useApp();
+  const { theme, setTheme } = useTheme();
   
   const [profile, setProfile] = useState({
     name: user?.name || '',
@@ -43,7 +45,6 @@ export function SettingsPage() {
   });
 
   const [preferences, setPreferences] = useState({
-    theme: 'light',
     language: 'en',
     timezone: 'UTC',
     studyGoal: '5'
@@ -87,18 +88,11 @@ export function SettingsPage() {
     '#a78bfa', '#fb7185', '#38d9a9', '#ffcc02', '#ff8c42'
   ];
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (preferences.theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else if (preferences.theme === 'light') {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    } else {
-      root.classList.remove('light', 'dark');
-    }
-  }, [preferences.theme]);
+  // Theme change handler
+  const handleThemeChange = (value: string) => {
+    setTheme(value as 'light' | 'dark' | 'system');
+    toast.success(`Theme changed to ${value}`);
+  };
 
   // Fixed implicit 'any' type errors for parameters
 
@@ -265,7 +259,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications.weeklyReports}
-                  onCheckedChange={(checked) => handleCheckedChange(checked, 'weeklyReports')}
+                  onCheckedChange={(checked: boolean) => handleCheckedChange(checked, 'weeklyReports')}
                 />
               </div>
             </CardContent>
@@ -283,7 +277,7 @@ export function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="theme">Theme</Label>
-                  <Select value={preferences.theme} onValueChange={(value: string) => handleValueChange(value, 'theme')}>
+                  <Select value={theme} onValueChange={handleThemeChange}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -299,7 +293,7 @@ export function SettingsPage() {
                   <Label htmlFor="language">Language</Label>
                   <Select
                     value={preferences.language}
-                    onValueChange={(value) => handleValueChange(value, 'language')}
+                    onValueChange={(value: string) => handleValueChange(value, 'language')}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -316,7 +310,7 @@ export function SettingsPage() {
                   <Label htmlFor="timezone">Timezone</Label>
                   <Select
                     value={preferences.timezone}
-                    onValueChange={(value) => handleValueChange(value, 'timezone')}
+                    onValueChange={(value: string) => handleValueChange(value, 'timezone')}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -333,7 +327,7 @@ export function SettingsPage() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="studyGoal">Daily Study Goal (hours)</Label>
-                  <Select value={preferences.studyGoal} onValueChange={(value) => handleValueChange(value, 'studyGoal')}>
+                  <Select value={preferences.studyGoal} onValueChange={(value: string) => handleValueChange(value, 'studyGoal')}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
