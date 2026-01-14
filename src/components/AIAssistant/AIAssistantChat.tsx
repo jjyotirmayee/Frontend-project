@@ -5,6 +5,7 @@ import { Card } from '../ui/card';
 import { ScrollArea } from '../ui/scroll-area';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { cn } from '../ui/utils';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import './AIAssistantChat.css';
 
 interface Message {
@@ -40,71 +41,59 @@ export function AIAssistantChat() {
     const apiProvider = (import.meta as any).env?.VITE_AI_PROVIDER;
     const apiKey = (import.meta as any).env?.VITE_API_KEY;
     
-    // Determine which provider to use
-    if (apiProvider === 'google' && apiKey) {
-      return await generateFromGoogle(userMessage, apiKey);
-    }
+    console.log('🤖 AI Response Debug:');
+    console.log('Provider:', apiProvider);
+    console.log('API Key exists:', !!apiKey);
+    console.log('User message:', userMessage);
     
-    if (apiProvider === 'openrouter' && apiKey) {
+    // Determine which provider to use (prioritize OpenRouter)
+    if (apiProvider === 'openrouter' && apiKey && !apiKey.includes('YOUR_')) {
+      console.log('✅ Using OpenRouter API');
       return await generateFromOpenRouter(userMessage, apiKey);
     }
     
-    if (apiProvider === 'huggingface' && apiKey) {
+    if (apiProvider === 'google' && apiKey && !apiKey.includes('YOUR_')) {
+      console.log('✅ Using Google Gemini API');
+      return await generateFromGoogle(userMessage, apiKey);
+    }
+    
+    if (apiProvider === 'huggingface' && apiKey && !apiKey.includes('YOUR_')) {
+      console.log('✅ Using Hugging Face API');
       return await generateFromHuggingFace(userMessage, apiKey);
     }
 
     // Fallback: Use mock responses based on keywords
+    console.log('⚠️ Using mock responses (no API configured)');
     return generateMockResponse(userMessage);
   };
 
   const generateFromGoogle = async (userMessage: string, apiKey: string): Promise<string> => {
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `You are an expert B.Tech and engineering exam preparation tutor. Answer this question concisely (2-3 sentences) for a student preparing for exams: ${userMessage}`,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 300,
-            },
-          }),
-        }
+      console.log('📡 Calling Google Gemini API using SDK...');
+      
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      const result = await model.generateContent(
+        `You are an expert B.Tech and engineering exam preparation tutor. Answer this question concisely (2-3 sentences) for a student preparing for exams: ${userMessage}`
       );
 
-      if (!response.ok) {
-        const error = await response.json();
-        console.warn('Google API error:', error);
-        return generateMockResponse(userMessage);
-      }
-
-      const data = await response.json();
-
-      if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-        return data.candidates[0].content.parts[0].text.trim();
-      }
-
-      return generateMockResponse(userMessage);
+      const response = result.response;
+      const text = response.text();
+      
+      console.log('✅ Got response from Google Gemini');
+      console.log('📝 Response:', text.substring(0, 100) + '...');
+      
+      return text;
     } catch (error) {
-      console.error('Google API error:', error);
+      console.error('❌ Google API error:', error);
       return generateMockResponse(userMessage);
     }
   };
 
   const generateFromOpenRouter = async (userMessage: string, token: string): Promise<string> => {
     try {
+      console.log('📡 Calling OpenRouter API...');
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -129,21 +118,27 @@ export function AIAssistantChat() {
         }),
       });
 
+      console.log('📊 Response status:', response.status);
+
       if (!response.ok) {
         const error = await response.json();
-        console.warn('OpenRouter API error:', error);
+        console.error('❌ OpenRouter API error:', error);
         return generateMockResponse(userMessage);
       }
 
       const data = await response.json();
+      console.log('✅ Got response from OpenRouter');
 
       if (data.choices && data.choices[0]?.message?.content) {
-        return data.choices[0].message.content.trim();
+        const text = data.choices[0].message.content.trim();
+        console.log('📝 Response:', text.substring(0, 100) + '...');
+        return text;
       }
 
+      console.warn('⚠️ No text in response, using fallback');
       return generateMockResponse(userMessage);
     } catch (error) {
-      console.error('OpenRouter error:', error);
+      console.error('❌ OpenRouter error:', error);
       return generateMockResponse(userMessage);
     }
   };
@@ -283,19 +278,35 @@ export function AIAssistantChat() {
                 >
                   <div
                     className={cn(
-                      'max-w-xs px-3 py-2 rounded-lg text-sm leading-relaxed',
+                      'rounded-lg text-sm leading-relaxed whitespace-pre-wrap break-words',
                       message.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-none'
-                        : 'bg-gray-200 text-gray-900 rounded-bl-none'
+                        ? 'bg-blue-600 text-white rounded-br-none px-3 py-2 max-w-xs'
+                        : 'bg-gray-100 text-gray-900 rounded-bl-none px-4 py-3 max-w-sm border border-gray-200'
                     )}
                   >
-                    {message.content}
+                    {/* Format the response with better readability */}
+                    {message.role === 'assistant' ? (
+                      <div className="space-y-2">
+                        {message.content.split('\n\n').map((paragraph, idx) => (
+                          <p key={idx} className="leading-relaxed">
+                            {paragraph.split('\n').map((line, lineIdx) => (
+                              <span key={lineIdx}>
+                                {line}
+                                <br />
+                              </span>
+                            ))}
+                          </p>
+                        ))}
+                      </div>
+                    ) : (
+                      message.content
+                    )}
                   </div>
                 </div>
               ))}
               {isLoading && (
                 <div className="flex gap-2 justify-start">
-                  <div className="bg-gray-200 text-gray-900 px-3 py-2 rounded-lg rounded-bl-none flex items-center gap-2">
+                  <div className="bg-gray-100 text-gray-900 px-4 py-3 rounded-lg rounded-bl-none flex items-center gap-2 border border-gray-200">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span className="text-sm">Thinking...</span>
                   </div>
