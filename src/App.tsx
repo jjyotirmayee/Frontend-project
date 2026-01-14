@@ -14,6 +14,7 @@ import { FlashcardPage } from './components/pages/FlashcardPage';
 import { TestsPage } from './components/pages/TestsPage';
 import { QuestionnairePage, Question } from './components/pages/QuestionnairePage';
 import { ResultPage } from './components/pages/ResultPage';
+import { AIAssistantChat } from './components/AIAssistant/AIAssistantChat';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -93,6 +94,7 @@ function AppContent() {
         <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
         <main className="flex-1 p-6">{renderPage()}</main>
       </div>
+      <AIAssistantChat />
     </div>
   );
 }
