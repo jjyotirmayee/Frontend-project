@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 
 const QuickRevisionPage: React.FC = () => {
-  const [points, setPoints] = useState<string[]>([]);
+  type PointItem = { text: string; subject: string; source: string };
+  const [points, setPoints] = useState<PointItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +20,65 @@ const QuickRevisionPage: React.FC = () => {
     const fetchAllNotes = async () => {
       try {
         setLoading(true);
-        const allPoints: string[] = [];
+  const allPoints: PointItem[] = [];
+
+        // Helper to robustly extract processed text from various shapes
+        const extractProcessed = (obj: any): string[] => {
+          if (!obj) return [];
+          // If the endpoint returned an array of notes already
+          if (Array.isArray(obj)) {
+            return obj.flatMap((note: any) => extractProcessed(note));
+          }
+
+          // If the object wraps notes
+          if (obj.notes && Array.isArray(obj.notes)) {
+            return obj.notes.flatMap((n: any) => extractProcessed(n));
+          }
+          if (obj.results && Array.isArray(obj.results)) {
+            return obj.results.flatMap((n: any) => extractProcessed(n));
+          }
+
+          // Common candidate keys (added 'content' and 'pointwise')
+          const candidates = [
+            'processed_notes', 'processedNotes', 'processed_note', 'processed',
+            'summary', 'bullets', 'processed_text', 'text', 'content', 'pointwise'
+          ];
+
+          for (const key of candidates) {
+            if (obj[key]) {
+              const value = obj[key];
+              if (Array.isArray(value)) return value.map((s:any) => String(s)).filter(Boolean);
+              if (typeof value === 'object') {
+                if (Array.isArray(value.lines)) return value.lines.map((s:any) => String(s)).filter(Boolean);
+                if (value.text) return [String(value.text)].filter(Boolean);
+              }
+              if (typeof value === 'string') {
+                const trimmed = value.trim();
+                try {
+                  const parsed = JSON.parse(trimmed);
+                  if (Array.isArray(parsed)) return parsed.map((s:any) => String(s)).filter(Boolean);
+                  if (parsed && typeof parsed === 'object' && parsed.lines) return parsed.lines.map((s:any) => String(s)).filter(Boolean);
+                } catch (e) {
+                  // not JSON, continue
+                }
+                return trimmed
+                  .split(/\r?\n|•|\u2022|\-|\*|\u2023/)
+                  .map((s) => s.replace(/^[\s\-\*•\u2022\u2023]+/, '').trim())
+                  .filter(Boolean);
+              }
+              return [String(value)].filter(Boolean);
+            }
+          }
+
+          if (typeof obj === 'string') {
+            return obj
+              .trim()
+              .split(/\r?\n|•|\u2022|\-|\*|\u2023/)
+              .map((s) => s.replace(/^[\s\-\*•\u2022\u2023]+/, '').trim())
+              .filter(Boolean);
+          }
+          return [];
+        };
 
         // Fetch from all endpoints in parallel
         const fetchPromises = Object.entries(subjectEndpoints).map(
@@ -31,21 +90,34 @@ const QuickRevisionPage: React.FC = () => {
                 return [];
               }
               const data = await response.json();
-              
-              // Handle different response shapes
-              let notes = [];
-              if (Array.isArray(data)) {
-                notes = data;
-              } else if (data.notes && Array.isArray(data.notes)) {
-                notes = data.notes;
-              } else if (data.results && Array.isArray(data.results)) {
-                notes = data.results;
+              console.debug('[QuickRevision] raw response for', subject, data);
+
+              // Collect points from top-level pointwise/summary and from notes array
+              const subjectPoints: PointItem[] = [];
+
+              // If API provides top-level pointwise (array) or summary/text, extract it
+              if (data.pointwise) {
+                const top = extractProcessed(data.pointwise);
+                subjectPoints.push(...top.map((s) => ({ text: s, subject, source: 'pointwise' })));
+              }
+              if (data.summary) {
+                const top = extractProcessed(data.summary);
+                subjectPoints.push(...top.map((s) => ({ text: s, subject, source: 'summary' })));
               }
 
-              // Extract processed_notes from each note
-              return notes
-                .filter((note: any) => note.processed_notes)
-                .map((note: any) => `[${subject}] ${note.processed_notes}`);
+              // Normalize to array of note-like objects
+              let notesArr: any[] = [];
+              if (Array.isArray(data)) notesArr = data;
+              else if (data.notes && Array.isArray(data.notes)) notesArr = data.notes;
+              else if (data.results && Array.isArray(data.results)) notesArr = data.results;
+              else if (typeof data === 'object' && (data.content || data._id)) notesArr = [data];
+
+              subjectPoints.push(...notesArr.flatMap((note: any) => {
+                const extracted = extractProcessed(note);
+                return extracted.map((s) => ({ text: s, subject, source: 'note' }));
+              }));
+
+              return subjectPoints;
             } catch (err) {
               console.warn(`Error fetching ${subject}:`, err);
               return [];
@@ -58,7 +130,17 @@ const QuickRevisionPage: React.FC = () => {
           allPoints.push(...subjectPoints);
         });
 
-        setPoints(allPoints);
+        // normalize, dedupe, limit (work with PointItem[])
+        const normalized = allPoints.map(p => ({ ...p, text: p.text.trim() })).filter(p => p.text);
+        const seen = new Set<string>();
+        const deduped = normalized.filter(p => {
+          if (seen.has(p.text)) return false;
+          seen.add(p.text);
+          return true;
+        });
+        const finalPoints = deduped.slice(0, 1000);
+
+        setPoints(finalPoints);
         setError(null);
       } catch (err) {
         console.error('Error fetching notes:', err);
@@ -74,6 +156,11 @@ const QuickRevisionPage: React.FC = () => {
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Quick Revision</h1>
+      {!loading && !error && (
+        <div style={{ textAlign: 'center', color: '#6b7280', marginBottom: 8 }}>
+          Found {points.length} revision item{points.length !== 1 ? 's' : ''}
+        </div>
+      )}
       
       {loading && (
         <div style={styles.loadingMessage}>Loading revision notes...</div>
@@ -94,7 +181,13 @@ const QuickRevisionPage: React.FC = () => {
           {points.map((point, index) => (
             <div key={index} style={styles.item}>
               <span style={styles.number}>{index + 1}.</span>
-              <span style={styles.text}>{point}</span>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, background: '#eef2ff', color: '#1e3a8a', padding: '2px 8px', borderRadius: 999 }}>{point.source}</span>
+                  <span style={{ fontSize: 12, color: '#6b7280' }}>[{point.subject}]</span>
+                </div>
+                <span style={styles.text}>{point.text}</span>
+              </div>
             </div>
           ))}
         </div>

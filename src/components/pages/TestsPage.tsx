@@ -11,7 +11,6 @@ interface AvailableTest {
   subject: string;
   questions: number;
   duration: number;
-  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 interface TestsPageProps {
@@ -23,18 +22,14 @@ export function TestsPage({ onStartTest }: TestsPageProps) {
   const [isTestStarted, setIsTestStarted] = useState(false);
 
   const availableTests: AvailableTest[] = [
-    { id: '1', subject: 'Data Structures & Algorithms', questions: 20, duration: 30, difficulty: 'medium' },
-    { id: '2', subject: 'Theory of Computation', questions: 20, duration: 30, difficulty: 'hard' },
-    { id: '3', subject: 'Computer Networks', questions: 20, duration: 30, difficulty: 'easy' },
-    { id: '4', subject: 'Computer Organization & Architecture', questions: 20, duration: 30, difficulty: 'medium' },
-    { id: '5', subject: 'Operating Systems', questions: 20, duration: 30, difficulty: 'hard' },
+    { id: '1', subject: 'Data Structures & Algorithms', questions: 20, duration: 30 },
+    { id: '2', subject: 'Theory of Computation', questions: 20, duration: 30 },
+    { id: '3', subject: 'Computer Networks', questions: 20, duration: 30 },
+    { id: '4', subject: 'Computer Organization & Architecture', questions: 20, duration: 30 },
+    { id: '5', subject: 'Operating Systems', questions: 20, duration: 30 },
   ];
 
-  const difficultyColors = {
-    easy: 'bg-green-100 text-green-700',
-    medium: 'bg-yellow-100 text-yellow-700',
-    hard: 'bg-red-100 text-red-700',
-  };
+
   const subjectEndpoints: Record<string, string> = {
     'Data Structures & Algorithms': 'http://127.0.0.1:8000/api/test/dsa/',
     'Theory of Computation': 'http://127.0.0.1:8000/api/test/toc',
@@ -80,18 +75,15 @@ export function TestsPage({ onStartTest }: TestsPageProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <FileText className="w-3 h-3" />
-                    {test.questions} questions
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {test.duration} min
-                  </div>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                <div className="flex items-center gap-1">
+                  <FileText className="w-3 h-3" />
+                  {test.questions} questions
                 </div>
-                <Badge className={difficultyColors[test.difficulty]}>{test.difficulty}</Badge>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {test.duration} min
+                </div>
               </div>
               <Button
                 size="sm"

@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export function SettingsPage() {
   const { user, logout } = useAuth();
@@ -265,7 +265,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications.weeklyReports}
-                  onCheckedChange={(checked) => handleCheckedChange(checked, 'weeklyReports')}
+                  onCheckedChange={(checked: boolean) => handleCheckedChange(checked, 'weeklyReports')}
                 />
               </div>
             </CardContent>
@@ -299,7 +299,7 @@ export function SettingsPage() {
                   <Label htmlFor="language">Language</Label>
                   <Select
                     value={preferences.language}
-                    onValueChange={(value) => handleValueChange(value, 'language')}
+                    onValueChange={(value: string) => handleValueChange(value, 'language')}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -316,7 +316,7 @@ export function SettingsPage() {
                   <Label htmlFor="timezone">Timezone</Label>
                   <Select
                     value={preferences.timezone}
-                    onValueChange={(value) => handleValueChange(value, 'timezone')}
+                    onValueChange={(value: string) => handleValueChange(value, 'timezone')}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -333,7 +333,7 @@ export function SettingsPage() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="studyGoal">Daily Study Goal (hours)</Label>
-                  <Select value={preferences.studyGoal} onValueChange={(value) => handleValueChange(value, 'studyGoal')}>
+                  <Select value={preferences.studyGoal} onValueChange={(value: string) => handleValueChange(value, 'studyGoal')}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

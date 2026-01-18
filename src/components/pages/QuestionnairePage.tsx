@@ -58,7 +58,7 @@ export const QuestionnairePage: React.FC<QuestionnairePageProps> = ({ questions,
         score += 4; // correct +4
         correctCount += 1;
       } else {
-        score -= 4; // wrong -4
+        score -= 1; // wrong -4
         incorrectCount += 1;
       }
     });

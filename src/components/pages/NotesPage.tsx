@@ -30,7 +30,7 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
   const [editingNote, setEditingNote] = useState<string | null>(null);
 
   const [newNote, setNewNote] = useState({ title: '', content: '', subject: '', tags: '' });
-  const [editNote, setEditNote] = useState({ title: '', content: '', subject: '', tags: '' });
+  const [editNote, setEditNote] = useState({ id: '', title: '', content: '', subject: '', tags: '' });
 
   const iconMap: any = {
     brain: <Brain className="w-4 h-4 text-white" />,
@@ -64,6 +64,7 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
     }
     fetchSubjects();
   }, []);
+  
 
   const getBackgroundColor = (subjectName: string) => {
     switch (subjectName) {
@@ -97,7 +98,7 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
     const tags = editNote.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
     updateNote(editNote.id || editingNote, { ...editNote, tags });
     setEditingNote(null);
-    setEditNote({ title: '', content: '', subject: '', tags: '' });
+    setEditNote({ id: '', title: '', content: '', subject: '', tags: '' });
     toast.success('Note updated successfully!');
   };
 
@@ -137,12 +138,12 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
             <form onSubmit={handleAddNote} className="space-y-3 mt-3">
               <div className="space-y-1">
                 <Label htmlFor="title" className="text-sm font-bold">Title</Label>
-                <Input id="title" placeholder="Enter note title" value={newNote.title} onChange={(e) => setNewNote(prev => ({ ...prev, title: e.target.value }))} required size="sm" />
+                <Input id="title" placeholder="Enter note title" value={newNote.title} onChange={(e) => setNewNote(prev => ({ ...prev, title: e.target.value }))} required className="h-8" />
               </div>
 
               <div className="space-y-1">
                 <Label htmlFor="subject" className="text-sm font-bold">Subject</Label>
-                <Select value={newNote.subject} onValueChange={(value) => setNewNote(prev => ({ ...prev, subject: value }))}>
+                <Select value={newNote.subject} onValueChange={(value: string) => setNewNote(prev => ({ ...prev, subject: value }))}>
                   <SelectTrigger className="h-8">
                     <SelectValue placeholder="Select subject" />
                   </SelectTrigger>
@@ -159,7 +160,7 @@ export function NotesPage({ onNavigate }: { onNavigate?: (page: string) => void 
 
               <div className="space-y-1">
                 <Label htmlFor="tags" className="text-sm font-bold">Tags (comma-separated)</Label>
-                <Input id="tags" placeholder="e.g., algorithms, important" value={newNote.tags} onChange={(e) => setNewNote(prev => ({ ...prev, tags: e.target.value }))} size="sm" />
+                <Input id="tags" placeholder="e.g., algorithms, important" value={newNote.tags} onChange={(e) => setNewNote(prev => ({ ...prev, tags: e.target.value }))} className="h-8" />
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
